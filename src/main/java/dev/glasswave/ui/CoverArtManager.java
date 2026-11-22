@@ -11,8 +11,8 @@ import net.minecraft.util.Identifier;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -52,30 +52,7 @@ public final class CoverArtManager {
         String imageUrl = track.coverUrl;
         CompletableFuture.runAsync(() -> {
             try {
-                URI uri = URI.create(imageUrl);
-                String host = uri.getHost();
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || host == null
-                        || !(host.equals("cdns-images.dzcdn.net") || host.endsWith(".dzcdn.net"))) {
-                    throw new IllegalArgumentException("Artwork host is not allowed");
-                }
-
-                URLConnection connection = uri.toURL().openConnection();
-                connection.setConnectTimeout(7_000);
-                connection.setReadTimeout(10_000);
-                connection.setRequestProperty("User-Agent", "Glasswave-Minecraft/0.2.0");
-                byte[] bytes;
-                try (InputStream input = connection.getInputStream();
-                     ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-                    byte[] buffer = new byte[8192];
-                    int total = 0;
-                    int read;
-                    while ((read = input.read(buffer)) != -1) {
-                        total += read;
-                        if (total > MAX_DOWNLOAD_BYTES) throw new IllegalStateException("Artwork is too large");
-                        output.write(buffer, 0, read);
-                    }
-                    bytes = output.toByteArray();
-                }
+                byte[] bytes = downloadArtwork(imageUrl);
 
                 MinecraftClient client = MinecraftClient.getInstance();
                 client.execute(() -> {
@@ -100,6 +77,63 @@ public final class CoverArtManager {
                 System.err.println("[Glasswave] Artwork unavailable: " + exception.getMessage());
             }
         });
+    }
+
+    /** Downloads image bytes only from HTTPS Deezer CDN hosts, revalidating every redirect. */
+    private static byte[] downloadArtwork(String rawUrl) throws Exception {
+        URI current = URI.create(rawUrl);
+        for (int redirect = 0; redirect <= 4; redirect++) {
+            validateArtworkUri(current);
+            HttpURLConnection connection = (HttpURLConnection) current.toURL().openConnection();
+            connection.setConnectTimeout(7_000);
+            connection.setReadTimeout(10_000);
+            connection.setRequestProperty("User-Agent", "Glasswave-Minecraft/0.2.1");
+            connection.setInstanceFollowRedirects(false);
+
+            int response = connection.getResponseCode();
+            if (response >= 300 && response < 400) {
+                String location = connection.getHeaderField("Location");
+                connection.disconnect();
+                if (location == null || location.isBlank()) {
+                    throw new IllegalStateException("Artwork redirect did not include a destination");
+                }
+                current = current.resolve(location);
+                continue;
+            }
+            if (response < 200 || response >= 300) {
+                connection.disconnect();
+                throw new IllegalStateException("Artwork server returned HTTP " + response);
+            }
+
+            try (InputStream input = connection.getInputStream();
+                 ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int total = 0;
+                int read;
+                while ((read = input.read(buffer)) != -1) {
+                    total += read;
+                    if (total > MAX_DOWNLOAD_BYTES) {
+                        throw new IllegalStateException("Artwork is too large");
+                    }
+                    output.write(buffer, 0, read);
+                }
+                return output.toByteArray();
+            } finally {
+                connection.disconnect();
+            }
+        }
+        throw new IllegalStateException("Too many artwork redirects");
+    }
+
+    private static void validateArtworkUri(URI uri) {
+        String host = uri.getHost();
+        boolean allowedHost = host != null
+                && (host.equalsIgnoreCase("dzcdn.net")
+                || host.toLowerCase(java.util.Locale.ROOT).endsWith(".dzcdn.net"));
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || !allowedHost
+                || uri.getUserInfo() != null || (uri.getPort() != -1 && uri.getPort() != 443)) {
+            throw new SecurityException("Only HTTPS artwork from Deezer CDN hosts is allowed");
+        }
     }
 
     private static void drawGenerated(DrawContext context, Track track, int x, int y, int size) {
