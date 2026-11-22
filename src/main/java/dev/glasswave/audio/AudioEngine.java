@@ -169,7 +169,8 @@ public final class AudioEngine {
         String host = uri.getHost();
         boolean allowedHost = host != null
                 && (host.equalsIgnoreCase("dzcdn.net") || host.toLowerCase(java.util.Locale.ROOT).endsWith(".dzcdn.net"));
-        if (!"https".equalsIgnoreCase(uri.getScheme()) || !allowedHost || uri.getUserInfo() != null) {
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || !allowedHost || uri.getUserInfo() != null
+                || (uri.getPort() != -1 && uri.getPort() != 443)) {
             throw new SecurityException("Only HTTPS previews from Deezer's dzcdn.net domain are allowed");
         }
     }
