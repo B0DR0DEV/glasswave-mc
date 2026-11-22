@@ -3,7 +3,7 @@
   "id": "glasswave",
   "version": "${version}",
   "name": "Glasswave",
-  "description": "A soft, floating glass music player for Minecraft.",
+  "description": "A floating glass music player with album art and animated controls.",
   "authors": ["B0DR0DEV"],
   "license": "MIT",
   "environment": "client",
