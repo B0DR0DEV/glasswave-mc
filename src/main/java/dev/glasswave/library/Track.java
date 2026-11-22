@@ -8,6 +8,7 @@ public final class Track {
     public String source = "local";
     public String location = "";
     public String previewUrl = "";
+    public String coverUrl = "";
     public boolean favorite = false;
     public boolean explicit = false;
 
@@ -26,7 +27,7 @@ public final class Track {
         return track;
     }
 
-    public static Track online(String id, String title, String artist, String album, String previewUrl) {
+    public static Track online(String id, String title, String artist, String album, String previewUrl, String coverUrl) {
         Track track = new Track();
         track.id = "deezer:" + id;
         track.title = title;
@@ -34,6 +35,7 @@ public final class Track {
         track.album = album;
         track.source = "deezer";
         track.previewUrl = previewUrl;
+        track.coverUrl = coverUrl;
         track.location = "Deezer preview";
         return track;
     }
