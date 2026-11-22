@@ -46,19 +46,28 @@ public final class GlasswaveScreen extends Screen {
         renderBackground(context, mouseX, mouseY, delta);
         calculateLayout();
 
-        double t = Math.min(1.0, (System.currentTimeMillis() - openedAt) / 320.0);
+        double t = Math.min(1.0, (System.currentTimeMillis() - openedAt) / 360.0);
         float ease = (float) (1.0 - Math.pow(1.0 - t, 3.0));
-        int slide = (int) ((1.0f - ease) * 12.0f);
-        int shellAlpha = (int) (0xD8 * ease);
         int textAlpha = (int) (255 * ease);
-        int y = panelY + slide;
+        int y = panelY + (int) ((1.0f - ease) * 10.0f);
 
-        // A layered translucent shell, rounded by scanlines rather than square widgets.
-        GlasswaveWidget.rounded(context, panelX - 4, y + 5, panelW + 8, panelH, 25, fade(0x090E18, (int) (95 * ease)));
-        GlasswaveWidget.rounded(context, panelX, y, panelW, panelH, 23, fade(0x101A29, shellAlpha));
-        GlasswaveWidget.rounded(context, panelX + 1, y + 1, panelW - 2, panelH - 2, 22, fade(0x19283A, (int) (0xD0 * ease)));
-        GlasswaveWidget.rounded(context, panelX + 2, y + 1, panelW - 4, 1, 1, fade(0xFFFFFF, (int) (42 * ease)));
-        GlasswaveWidget.rounded(context, panelX + panelW - 210, y + 2, 150, 2, 2, fade(0x7FCBC8, (int) (35 * ease)));
+        // Frosted surface: the game scene remains visible through the panel.
+        GlasswaveWidget.rounded(context, panelX - 5, y + 7, panelW + 10, panelH + 6, 29,
+                fade(0x030713, (int) (52 * ease)));
+        GlasswaveWidget.rounded(context, panelX - 1, y - 1, panelW + 2, panelH + 2, 27,
+                fade(0xD7F0F3, (int) (44 * ease)));
+        GlasswaveWidget.rounded(context, panelX, y, panelW, panelH, 26,
+                fade(0x0B1728, (int) (82 * ease)));
+        GlasswaveWidget.rounded(context, panelX + 1, y + 1, panelW - 2, panelH - 2, 25,
+                fade(0x25435A, (int) (38 * ease)));
+
+        // Soft reflections on the upper edge and the right side of the glass.
+        GlasswaveWidget.rounded(context, panelX + 3, y + 2, panelW - 6, 1, 1,
+                fade(0xFFFFFF, (int) (66 * ease)));
+        GlasswaveWidget.rounded(context, panelX + 18, y + 3, 245, 2, 1,
+                fade(0x9FE4E0, (int) (30 * ease)));
+        GlasswaveWidget.rounded(context, panelX + panelW - 98, y + 28, 54, panelH - 56, 24,
+                fade(0x9ECAD8, (int) (8 * ease)));
 
         drawHeader(context, y, textAlpha);
         drawSidebar(context, y, mouseX, mouseY, textAlpha);
@@ -69,62 +78,95 @@ public final class GlasswaveScreen extends Screen {
     }
 
     private void calculateLayout() {
-        panelW = Math.min(770, Math.max(330, width - 28));
-        panelH = Math.min(472, Math.max(290, height - 24));
+        panelW = Math.min(790, Math.max(360, width - 32));
+        panelH = Math.min(500, Math.max(320, height - 28));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        sideX = panelX + 16;
-        sideY = panelY + 72;
+        sideX = panelX + 22;
+        sideY = panelY + 88;
         sideW = Math.min(150, panelW / 4);
-        contentX = sideX + sideW + 16;
+        contentX = sideX + sideW + 22;
         contentY = sideY;
-        contentW = panelX + panelW - 18 - contentX;
-        playerY = panelY + panelH - 66;
-        listY = contentY + 106;
-        listBottom = playerY - 12;
+        contentW = panelX + panelW - 24 - contentX;
+        playerY = panelY + panelH - 78;
+        listY = contentY + 105;
+        listBottom = playerY - 18;
     }
 
     private void drawHeader(DrawContext context, int y, int alpha) {
-        GlasswaveWidget.rounded(context, panelX + 20, y + 18, 35, 35, 12, fade(0x416E7D, alpha));
-        GlasswaveWidget.rounded(context, panelX + 24, y + 22, 27, 27, 9, fade(0x9BD9D5, alpha));
-        drawText(context, "g", panelX + 33, y + 29, fade(0x13242E, alpha), true);
-        drawText(context, "GLASSWAVE", panelX + 66, y + 20, fade(0xF3F7FC, alpha), true);
-        drawText(context, "музыка, которая просто рядом", panelX + 66, y + 36, fade(0x9DADBE, alpha), false);
+        int markX = panelX + 22;
+        int markY = y + 22;
+        GlasswaveWidget.rounded(context, markX, markY, 38, 38, 14, fade(0x8CDAD6, (int) (42 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, markX + 1, markY + 1, 36, 36, 13, fade(0x122A3A, (int) (110 * alpha / 255.0)));
+        GlasswaveWidget.drawWaveMark(context, markX + 9, markY + 9, fade(0xB6F1E8, alpha));
 
-        int closeX = panelX + panelW - 42;
-        GlasswaveWidget.rounded(context, closeX, y + 22, 24, 24, 12,
-                fade(0xFFFFFF, isInside(mouseX(), mouseY(), closeX, y + 22, 24, 24) ? 48 : 24));
-        drawText(context, "×", closeX + 8, y + 27, fade(0xE5EDF5, alpha), false);
+        drawText(context, "GLASSWAVE", panelX + 72, y + 25, fade(0xF4FAFF, alpha), true);
+        drawText(context, "MUSIC PLAYER", panelX + 73, y + 42, fade(0x91AEBE, alpha), false);
+
+        int closeX = panelX + panelW - 51;
+        boolean hovered = isInside(mouseX(), mouseY(), closeX, y + 23, 29, 29);
+        GlasswaveWidget.rounded(context, closeX, y + 23, 29, 29, 15,
+                fade(hovered ? 0xFFFFFF : 0xDDEAF0, hovered ? 46 : 20));
+        GlasswaveWidget.drawCloseIcon(context, closeX + 9, y + 32, fade(0xEAF4F8, alpha));
     }
 
     private void drawSidebar(DrawContext context, int y, int mouseX, int mouseY, int alpha) {
-        GlasswaveWidget.rounded(context, sideX, sideY + (y - panelY), sideW, playerY - sideY - 10, 18,
-                fade(0x111D2A, (int) (0xA8 * alpha / 255.0)));
-        drawText(context, "РАЗДЕЛЫ", sideX + 14, sideY + 14 + (y - panelY), fade(0x7F93A7, alpha), true);
+        int offset = y - panelY;
+        int navX = sideX + 5;
+        int navW = sideW - 10;
 
-        drawNavItem(context, "◫", "Медиатека", TAB_LIBRARY, sideY + 35 + (y - panelY), mouseX, mouseY, alpha);
-        drawNavItem(context, "♡", "Избранное", TAB_FAVORITES, sideY + 75 + (y - panelY), mouseX, mouseY, alpha);
-        drawNavItem(context, "⌕", "Онлайн-поиск", TAB_DISCOVER, sideY + 115 + (y - panelY), mouseX, mouseY, alpha);
+        // A divider instead of another opaque card keeps the whole surface light.
+        context.fill(sideX + sideW + 10, sideY + offset - 6, sideX + sideW + 11,
+                playerY - 16 + offset, fade(0xFFFFFF, (int) (24 * alpha / 255.0)));
+        drawText(context, "РАЗДЕЛЫ", sideX + 11, sideY + 4 + offset,
+                fade(0x8EA8B9, alpha), true);
 
-        int addY = playerY - 57 + (y - panelY);
-        GlasswaveWidget.rounded(context, sideX + 8, addY, sideW - 16, 34, 12,
-                fade(isInside(mouseX, mouseY, sideX + 8, addY, sideW - 16, 34) ? 0x38566A : 0x263E51, alpha));
-        drawText(context, "+", sideX + 18, addY + 10, fade(0xA9E1DE, alpha), true);
-        drawText(context, "Добавить папку", sideX + 36, addY + 11, fade(0xDCE7F0, alpha), false);
+        drawNavItem(context, TAB_LIBRARY, "Медиатека", sideY + 28 + offset, mouseX, mouseY, alpha);
+        drawNavItem(context, TAB_FAVORITES, "Избранное", sideY + 70 + offset, mouseX, mouseY, alpha);
+        drawNavItem(context, TAB_DISCOVER, "Онлайн-поиск", sideY + 112 + offset, mouseX, mouseY, alpha);
 
-        drawText(context, "LOCAL FIRST", sideX + 14, playerY - 18 + (y - panelY), fade(0x62798D, alpha), true);
+        int addY = playerY - 62 + offset;
+        boolean addHover = isInside(mouseX, mouseY, navX, addY, navW, 38);
+        GlasswaveWidget.rounded(context, navX, addY, navW, 38, 13,
+                fade(addHover ? 0x80DCD9 : 0xB7E6E4, addHover ? 54 : 34));
+        GlasswaveWidget.rounded(context, navX + 1, addY + 1, navW - 2, 1, 1,
+                fade(0xFFFFFF, 58));
+        GlasswaveWidget.drawFolderIcon(context, sideX + 15, addY + 12, fade(0xC9F5EF, alpha));
+        drawText(context, "Добавить папку", sideX + 38, addY + 14,
+                fade(0xE5F3F6, alpha), true);
+
+        drawText(context, "ЛОКАЛЬНАЯ МУЗЫКА", sideX + 11, playerY - 17 + offset,
+                fade(0x718B9E, alpha), true);
     }
 
-    private void drawNavItem(DrawContext context, String icon, String label, int itemTab, int itemY,
+    private void drawNavItem(DrawContext context, int itemTab, String label, int itemY,
                              int mouseX, int mouseY, int alpha) {
         boolean selected = tab == itemTab;
-        boolean hovered = isInside(mouseX, mouseY, sideX + 7, itemY, sideW - 14, 34);
-        if (selected || hovered) {
-            GlasswaveWidget.rounded(context, sideX + 7, itemY, sideW - 14, 34, 11,
-                    fade(selected ? 0x3D6576 : 0x263B4D, alpha));
+        int itemX = sideX + 5;
+        int itemW = sideW - 10;
+        boolean hovered = isInside(mouseX, mouseY, itemX, itemY, itemW, 36);
+
+        if (selected) {
+            GlasswaveWidget.rounded(context, itemX, itemY, itemW, 36, 13,
+                    fade(0x91DCD8, (int) (43 * alpha / 255.0)));
+            GlasswaveWidget.rounded(context, itemX + 1, itemY + 1, 2, 34, 1,
+                    fade(0xA7F2E8, alpha));
+            GlasswaveWidget.rounded(context, itemX + 8, itemY + 1, itemW - 16, 1, 1,
+                    fade(0xFFFFFF, (int) (26 * alpha / 255.0)));
+        } else if (hovered) {
+            GlasswaveWidget.rounded(context, itemX, itemY, itemW, 36, 13,
+                    fade(0xFFFFFF, (int) (20 * alpha / 255.0)));
         }
-        drawText(context, icon, sideX + 18, itemY + 10, fade(selected ? 0x9FE0D9 : 0x91A6B8, alpha), true);
-        drawText(context, label, sideX + 42, itemY + 11, fade(selected ? 0xF0F7FA : 0xAFC0CE, alpha), selected);
+
+        int iconX = sideX + 16;
+        int iconY = itemY + 11;
+        int iconColor = fade(selected ? 0xB8F4E9 : 0x9FB5C3, alpha);
+        if (itemTab == TAB_LIBRARY) GlasswaveWidget.drawLibraryIcon(context, iconX, iconY, iconColor);
+        else if (itemTab == TAB_FAVORITES) GlasswaveWidget.drawHeartIcon(context, iconX, iconY, iconColor);
+        else GlasswaveWidget.drawSearchIcon(context, iconX, iconY, iconColor);
+
+        drawText(context, label, sideX + 43, itemY + 12,
+                fade(selected ? 0xF4FBFF : 0xB6C7D2, alpha), selected);
     }
 
     private void drawContent(DrawContext context, int y, int mouseX, int mouseY, int alpha) {
@@ -132,38 +174,50 @@ public final class GlasswaveScreen extends Screen {
         String heading = switch (tab) {
             case TAB_FAVORITES -> "Избранное";
             case TAB_DISCOVER -> "Найти музыку";
-            default -> "Твоя медиатека";
+            default -> "Медиатека";
         };
         String subtitle = switch (tab) {
-            case TAB_FAVORITES -> "Всё, что хочется оставить рядом";
-            case TAB_DISCOVER -> "Найди трек и послушай короткое превью";
-            default -> "Локальные треки в одном спокойном месте";
+            case TAB_FAVORITES -> "Треки, которые ты сохранил";
+            case TAB_DISCOVER -> "Поиск коротких превью";
+            default -> "Музыка с твоего устройства";
         };
-        drawText(context, heading, contentX + 3, contentY + 5 + offset, fade(0xF2F6FB, alpha), true);
-        drawText(context, subtitle, contentX + 3, contentY + 22 + offset, fade(0x8EA2B5, alpha), false);
 
-        int searchY = contentY + 49 + offset;
-        GlasswaveWidget.rounded(context, contentX, searchY, contentW - (tab == TAB_DISCOVER ? 82 : 0), 31, 13,
-                fade(0x0C1724, alpha));
-        drawText(context, "⌕", contentX + 12, searchY + 9, fade(0x87A9B6, alpha), true);
-        String placeholder = tab == TAB_DISCOVER ? "Артист или название трека…" : "Фильтр по названию…";
+        drawText(context, heading, contentX + 2, contentY + 3 + offset,
+                fade(0xF4F9FD, alpha), true);
+        drawText(context, subtitle, contentX + 2, contentY + 21 + offset,
+                fade(0x9AB0BF, alpha), false);
+
+        int searchY = contentY + 51 + offset;
+        int searchW = contentW - (tab == TAB_DISCOVER ? 86 : 0);
+        GlasswaveWidget.rounded(context, contentX, searchY, searchW, 33, 14,
+                fade(0x071321, (int) (74 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, contentX + 1, searchY + 1, searchW - 2, 1, 1,
+                fade(0xFFFFFF, (int) (44 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, contentX, searchY, searchW, 33, 14,
+                fade(0xD5EFF2, (int) (22 * alpha / 255.0)));
+        GlasswaveWidget.drawSearchIcon(context, contentX + 12, searchY + 10, fade(0x8FAFBF, alpha));
+
+        String placeholder = tab == TAB_DISCOVER ? "Артист или название трека…" : "Поиск в коллекции…";
         String shownQuery = searchInput.isEmpty() ? placeholder : searchInput;
-        drawText(context, trim(shownQuery, contentW - (tab == TAB_DISCOVER ? 126 : 40)),
-                contentX + 31, searchY + 10, fade(searchInput.isEmpty() ? 0x657D90 : 0xE3EDF4, alpha), false);
+        drawText(context, trim(shownQuery, searchW - 48), contentX + 34, searchY + 12,
+                fade(searchInput.isEmpty() ? 0x8299A9 : 0xE8F2F7, alpha), false);
 
         if (tab == TAB_DISCOVER) {
-            int buttonX = contentX + contentW - 72;
-            boolean hovered = isInside(mouseX, mouseY, buttonX, searchY, 72, 31);
-            GlasswaveWidget.rounded(context, buttonX, searchY, 72, 31, 13,
-                    fade(hovered ? 0x568D93 : 0x3F747D, alpha));
-            drawText(context, MusicLibrary.isSearching() ? "…" : "Найти", buttonX + 19, searchY + 10,
-                    fade(0xF1FBFC, alpha), true);
+            int buttonX = contentX + contentW - 76;
+            boolean hovered = isInside(mouseX, mouseY, buttonX, searchY, 76, 33);
+            GlasswaveWidget.rounded(context, buttonX, searchY, 76, 33, 14,
+                    fade(hovered ? 0x76CCC6 : 0x5DADAD, (int) (145 * alpha / 255.0)));
+            GlasswaveWidget.rounded(context, buttonX + 1, searchY + 1, 74, 1, 1,
+                    fade(0xFFFFFF, (int) (66 * alpha / 255.0)));
+            drawText(context, MusicLibrary.isSearching() ? "…" : "Найти",
+                    buttonX + 22, searchY + 12, fade(0xF4FFFF, alpha), true);
         }
 
         int listTop = listY + offset;
         int bottom = listBottom + offset;
-        GlasswaveWidget.rounded(context, contentX, listTop - 10, contentW, Math.max(46, bottom - listTop + 10), 16,
-                fade(0x0D1723, (int) (0x80 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, contentX, listTop - 7, contentW,
+                Math.max(48, bottom - listTop + 7), 17,
+                fade(0x081522, (int) (22 * alpha / 255.0)));
 
         List<Track> visible = visibleTracks();
         int rowHeight = 46;
@@ -171,96 +225,118 @@ public final class GlasswaveScreen extends Screen {
         if (visible.isEmpty()) {
             String empty = tab == TAB_DISCOVER
                     ? (MusicLibrary.isSearching() ? "Ищем треки…" : "Введи запрос и нажми «Найти»")
-                    : (tab == TAB_FAVORITES ? "Здесь пока пусто — отмечай треки сердечком" : "Добавь папку с MP3 или WAV-файлами");
-            drawText(context, empty, contentX + 18, listTop + 18, fade(0x8297A9, alpha), false);
+                    : (tab == TAB_FAVORITES ? "Пока нет избранных треков" : "Добавь папку с музыкой");
+            drawText(context, empty, contentX + 18, listTop + 18,
+                    fade(0x91A7B7, alpha), false);
         } else {
             int start = Math.max(0, Math.min(scroll, Math.max(0, visible.size() - maxRows)));
             for (int index = start; index < Math.min(visible.size(), start + maxRows); index++) {
                 Track track = visible.get(index);
                 int rowIndex = index - start;
-                drawTrackRow(context, track, index, listTop + rowIndex * rowHeight, mouseX, mouseY, alpha);
+                drawTrackRow(context, track, index, listTop + rowIndex * rowHeight,
+                        mouseX, mouseY, alpha);
             }
         }
 
         String footer = MusicLibrary.status();
-        drawText(context, trim(footer, contentW), contentX + 7, playerY - 13 + offset,
-                fade(0x7890A3, alpha), false);
+        drawText(context, trim(footer, contentW - 8), contentX + 4, playerY - 15 + offset,
+                fade(0x8299A9, alpha), false);
     }
 
     private void drawTrackRow(DrawContext context, Track track, int index, int rowY,
                               int mouseX, int mouseY, int alpha) {
-        boolean hovered = isInside(mouseX, mouseY, contentX + 5, rowY, contentW - 10, 41);
+        boolean hovered = isInside(mouseX, mouseY, contentX + 3, rowY, contentW - 6, 42);
         if (hovered) {
-            GlasswaveWidget.rounded(context, contentX + 5, rowY, contentW - 10, 41, 12,
-                    fade(0x293E50, alpha));
+            GlasswaveWidget.rounded(context, contentX + 3, rowY, contentW - 6, 42, 13,
+                    fade(0xD9F3F2, (int) (24 * alpha / 255.0)));
+            GlasswaveWidget.rounded(context, contentX + 12, rowY + 1, contentW - 24, 1, 1,
+                    fade(0xFFFFFF, (int) (22 * alpha / 255.0)));
         }
 
-        CoverArtManager.draw(context, track, contentX + 13, rowY + 7, 27);
-        GlasswaveWidget.rounded(context, contentX + 12, rowY + 6, 29, 29, 10, fade(0x42FFFFFF, alpha));
-        GlasswaveWidget.rounded(context, contentX + 14, rowY + 8, 25, 1, 1, fade(0x48FFFFFF, alpha));
+        CoverArtManager.draw(context, track, contentX + 12, rowY + 6, 30);
+        GlasswaveWidget.rounded(context, contentX + 11, rowY + 5, 32, 32, 10,
+                fade(0xFFFFFF, (int) (34 * alpha / 255.0)));
 
-        int textX = contentX + 50;
-        int textWidth = Math.max(55, contentW - 126);
-        drawText(context, trim(track.title, textWidth), textX, rowY + 8, fade(0xE7EFF6, alpha), true);
+        int textX = contentX + 53;
+        int textWidth = Math.max(55, contentW - 132);
+        drawText(context, trim(track.title, textWidth), textX, rowY + 8,
+                fade(0xEDF5FA, alpha), true);
         String metadata = "deezer".equals(track.source) ? track.artist + " · превью" : track.artist;
-        drawText(context, trim(metadata, textWidth), textX, rowY + 23, fade(0x8399AC, alpha), false);
+        drawText(context, trim(metadata, textWidth), textX, rowY + 24,
+                fade(0x91A7B6, alpha), false);
 
-        String heart = isFavorite(track) ? "♥" : "♡";
-        drawText(context, heart, contentX + contentW - 36, rowY + 13,
-                fade(isFavorite(track) ? 0xE9A6C0 : 0x8298AA, alpha), true);
+        int heartX = contentX + contentW - 35;
+        GlasswaveWidget.drawHeartIcon(context, heartX, rowY + 14,
+                fade(isFavorite(track) ? 0xE8A9C4 : 0x91A9B8, alpha));
+
         Track active = MusicLibrary.currentTrack();
         boolean thisTrackPlaying = AudioEngine.isPlaying() && active != null && active.id.equals(track.id);
         if (thisTrackPlaying) {
-            CoverArtManager.drawEqualizer(context, contentX + contentW - 76, rowY + 20, 4, 13, true, fade(0x9BE1D9, alpha));
-        } else {
-            drawText(context, "···", contentX + contentW - 70, rowY + 13, fade(0x71899C, alpha), false);
+            CoverArtManager.drawEqualizer(context, contentX + contentW - 70,
+                    rowY + 18, 4, 13, true, fade(0xA2E8DF, alpha));
         }
     }
 
     private void drawPlayerBar(DrawContext context, int y, int mouseX, int mouseY, int alpha) {
-        int barX = panelX + 16;
+        int barX = panelX + 17;
         int barY = playerY + (y - panelY);
-        int barW = panelW - 32;
-        GlasswaveWidget.rounded(context, barX, barY, barW, 50, 17, fade(0x223447, alpha));
-        GlasswaveWidget.rounded(context, barX + 1, barY + 1, barW - 2, 1, 1, fade(0x4EFFFFFF, alpha));
+        int barW = panelW - 34;
+
+        GlasswaveWidget.rounded(context, barX - 1, barY - 1, barW + 2, 60, 19,
+                fade(0xD8F1F2, (int) (36 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, barX, barY, barW, 58, 18,
+                fade(0x091625, (int) (112 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, barX + 1, barY + 1, barW - 2, 1, 1,
+                fade(0xFFFFFF, (int) (68 * alpha / 255.0)));
+        GlasswaveWidget.rounded(context, barX + 12, barY + 2, 130, 1, 1,
+                fade(0x9FE4DF, (int) (34 * alpha / 255.0)));
 
         Track current = MusicLibrary.currentTrack();
-        CoverArtManager.draw(context, current, barX + 10, barY + 9, 32);
-        GlasswaveWidget.rounded(context, barX + 9, barY + 8, 34, 34, 12, fade(0x42FFFFFF, alpha));
-        GlasswaveWidget.rounded(context, barX + 11, barY + 10, 30, 1, 1, fade(0x4BFFFFFF, alpha));
+        CoverArtManager.draw(context, current, barX + 12, barY + 12, 34);
+        GlasswaveWidget.rounded(context, barX + 11, barY + 11, 36, 36, 12,
+                fade(0xFFFFFF, (int) (38 * alpha / 255.0)));
+
         String currentTitle = current == null ? "Ничего не играет" : current.title;
         String currentArtist = current == null ? "Выбери трек в медиатеке" : current.artist;
-        drawText(context, trim(currentTitle, Math.max(70, barW / 3 - 20)), barX + 51, barY + 12,
-                fade(0xF0F5F9, alpha), true);
-        drawText(context, trim(currentArtist, Math.max(70, barW / 3 - 20)), barX + 51, barY + 28,
-                fade(0x91A6B8, alpha), false);
-        CoverArtManager.drawEqualizer(context, barX + 51, barY + 43, 6, 8,
-                AudioEngine.isPlaying(), fade(0x8BCFCB, alpha));
+        drawText(context, trim(currentTitle, Math.max(70, barW / 3 - 44)), barX + 58, barY + 15,
+                fade(0xF2F8FC, alpha), true);
+        drawText(context, trim(currentArtist, Math.max(70, barW / 3 - 44)), barX + 58, barY + 31,
+                fade(0x9CB2C0, alpha), false);
+        CoverArtManager.drawEqualizer(context, barX + 58, barY + 46, 6, 7,
+                AudioEngine.isPlaying(), fade(0x93DCD5, alpha));
 
         int controlsCenter = panelX + panelW / 2 + 10;
-        drawControl(context, "‹", controlsCenter - 48, barY + 13, 26, mouseX, mouseY, alpha);
-        drawControl(context, AudioEngine.isPlaying() ? "Ⅱ" : "▶", controlsCenter - 13, barY + 10,
-                32, mouseX, mouseY, alpha);
-        drawControl(context, "›", controlsCenter + 28, barY + 13, 26, mouseX, mouseY, alpha);
+        drawControl(context, 0, controlsCenter - 48, barY + 16, 26, mouseX, mouseY, alpha);
+        drawControl(context, 1, controlsCenter - 13, barY + 13, 32, mouseX, mouseY, alpha);
+        drawControl(context, 2, controlsCenter + 28, barY + 16, 26, mouseX, mouseY, alpha);
 
-        if (panelW >= 540) {
-            int sliderX = panelX + panelW - 145;
-            int sliderY = barY + 24;
-            drawText(context, "VOL", sliderX - 29, barY + 20, fade(0x718A9E, alpha), true);
-            GlasswaveWidget.rounded(context, sliderX, sliderY, 84, 4, 2, fade(0x607589, alpha));
+        if (panelW >= 560) {
+            int sliderX = panelX + panelW - 143;
+            int sliderY = barY + 29;
+            GlasswaveWidget.drawVolumeIcon(context, sliderX - 22, barY + 22, fade(0x90A8B8, alpha));
+            GlasswaveWidget.rounded(context, sliderX, sliderY, 84, 4, 2,
+                    fade(0xFFFFFF, (int) (62 * alpha / 255.0)));
             int fill = (int) (84 * AudioEngine.getVolume());
-            GlasswaveWidget.rounded(context, sliderX, sliderY, Math.max(3, fill), 4, 2, fade(0x9BD9D5, alpha));
-            GlasswaveWidget.rounded(context, sliderX + fill - 4, sliderY - 3, 10, 10, 5, fade(0xE9F6F4, alpha));
+            GlasswaveWidget.rounded(context, sliderX, sliderY, Math.max(3, fill), 4, 2,
+                    fade(0x9AE0D8, alpha));
+            GlasswaveWidget.rounded(context, sliderX + fill - 4, sliderY - 4, 11, 11, 6,
+                    fade(0xE9FAF7, alpha));
         }
     }
 
-    private void drawControl(DrawContext context, String label, int x, int y, int size,
+    private void drawControl(DrawContext context, int action, int x, int y, int size,
                              int mouseX, int mouseY, int alpha) {
         boolean hovered = isInside(mouseX, mouseY, x, y, size, size);
         GlasswaveWidget.rounded(context, x, y, size, size, size / 2,
-                fade(hovered ? 0x5A8B91 : 0x354B5C, alpha));
-        drawText(context, label, x + (size - textRenderer.getWidth(label)) / 2,
-                y + (size - 9) / 2, fade(0xEFF8F8, alpha), true);
+                fade(hovered ? 0xA3E8E0 : 0xD6EAF0, hovered ? 64 : 30));
+        if (action == 0) {
+            GlasswaveWidget.drawSkipIcon(context, x + 7, y + 8, false, fade(0xF0FAFC, alpha));
+        } else if (action == 1) {
+            if (AudioEngine.isPlaying()) GlasswaveWidget.drawPauseIcon(context, x + 11, y + 10, fade(0xF4FCFF, alpha));
+            else GlasswaveWidget.drawPlayIcon(context, x + 11, y + 10, fade(0xF4FCFF, alpha));
+        } else {
+            GlasswaveWidget.drawSkipIcon(context, x + 8, y + 8, true, fade(0xF0FAFC, alpha));
+        }
     }
 
     private List<Track> visibleTracks() {
