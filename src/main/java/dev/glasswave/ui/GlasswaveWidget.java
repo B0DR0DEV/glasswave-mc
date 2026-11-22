@@ -25,15 +25,15 @@ public final class GlasswaveWidget {
         int x = HudPosition.getX(screenWidth);
         int y = HudPosition.getY(screenHeight);
         long time = System.currentTimeMillis();
-        int auraAlpha = 18 + (int) ((Math.sin(time / 720.0) + 1.0) * 7.0);
+        int auraAlpha = 11 + (int) ((Math.sin(time / 900.0) + 1.0) * 4.0);
         int aura = (auraAlpha << 24) | 0x002BC8C7;
 
         // Layered glass: soft ambient glow, smoked body, inner reflection and fine edge.
-        rounded(context, x - 4, y - 4, WIDTH + 8, HEIGHT + 8, 21, aura);
-        rounded(context, x - 1, y + 2, WIDTH + 2, HEIGHT + 2, 19, 0xC807101A);
-        rounded(context, x, y, WIDTH, HEIGHT, 18, 0xDB101C2B);
-        rounded(context, x + 1, y + 1, WIDTH - 2, HEIGHT - 3, 17, 0xC51C2D40);
-        rounded(context, x + 3, y + 2, WIDTH - 6, 1, 1, 0x32FFFFFF);
+        rounded(context, x - 5, y - 5, WIDTH + 10, HEIGHT + 10, 22, aura);
+        rounded(context, x - 1, y + 2, WIDTH + 2, HEIGHT + 2, 19, 0x56030A12);
+        rounded(context, x, y, WIDTH, HEIGHT, 18, 0x94101C2B);
+        rounded(context, x + 1, y + 1, WIDTH - 2, HEIGHT - 3, 17, 0x702B4A60);
+        rounded(context, x + 3, y + 2, WIDTH - 6, 1, 1, 0x65FFFFFF);
         rounded(context, x + 9, y + 3, 66, 1, 1, 0x16A9ECE6);
         rounded(context, x + WIDTH - 52, y + 2, 35, 1, 1, 0x22FFFFFF);
 
@@ -53,7 +53,7 @@ public final class GlasswaveWidget {
         rounded(context, buttonX - 1, y + 8, 30, 32, 16, 0x20FFFFFF);
         rounded(context, buttonX, y + 9, 28, 30, 15, 0x5AFFFFFF);
         context.drawTextWithShadow(client.textRenderer,
-                Text.literal(AudioEngine.isPlaying() ? "Ⅱ" : "▶"), buttonX + 9, y + 18, 0xFFF4F8FC);
+                Text.literal(AudioEngine.isPlaying() ? "||" : ">"), buttonX + 9, y + 18, 0xFFF4F8FC);
 
         rounded(context, x + 13, y + HEIGHT - 4, WIDTH - 26, 1, 1, 0x35FFFFFF);
         if (AudioEngine.getDurationSeconds() > 0) {
