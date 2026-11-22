@@ -98,4 +98,80 @@ public final class GlasswaveWidget {
             context.fill(x + inset, y + row, x + width - inset, y + row + 1, color);
         }
     }
+
+    // Small vector glyphs are drawn with Minecraft primitives, avoiding font-dependent
+    // Unicode symbols that can turn into boxes or asterisks on some installations.
+    public static void drawWaveMark(DrawContext c, int x, int y, int color) {
+        rounded(c, x + 1, y + 8, 3, 10, 1, color);
+        rounded(c, x + 7, y + 3, 3, 20, 1, color);
+        rounded(c, x + 13, y, 3, 26, 1, color);
+        rounded(c, x + 19, y + 6, 3, 14, 1, color);
+    }
+
+    public static void drawLibraryIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y + 1, 13, 12, 2, color);
+        rounded(c, x + 2, y + 3, 9, 1, 1, 0xFF243F50);
+        rounded(c, x + 2, y + 6, 7, 1, 1, 0xFF243F50);
+        rounded(c, x + 2, y + 9, 8, 1, 1, 0xFF243F50);
+    }
+
+    public static void drawHeartIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x + 2, y + 1, 4, 4, 2, color);
+        rounded(c, x + 7, y + 1, 4, 4, 2, color);
+        rounded(c, x + 1, y + 4, 11, 4, 2, color);
+        rounded(c, x + 3, y + 7, 7, 3, 2, color);
+        rounded(c, x + 5, y + 9, 3, 2, 1, color);
+    }
+
+    public static void drawSearchIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y, 9, 9, 5, color);
+        rounded(c, x + 2, y + 2, 5, 5, 3, 0xFF193346);
+        rounded(c, x + 8, y + 8, 3, 6, 1, color);
+    }
+
+    public static void drawFolderIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y + 3, 15, 10, 3, color);
+        rounded(c, x + 1, y + 1, 7, 4, 2, color);
+        rounded(c, x + 2, y + 5, 11, 1, 1, 0xFF315264);
+    }
+
+    public static void drawCloseIcon(DrawContext c, int x, int y, int color) {
+        for (int i = 0; i < 9; i++) {
+            rounded(c, x + i, y + i, 2, 2, 1, color);
+            rounded(c, x + 8 - i, y + i, 2, 2, 1, color);
+        }
+    }
+
+    public static void drawPlayIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y, 3, 14, 1, color);
+        rounded(c, x + 3, y + 2, 3, 10, 1, color);
+        rounded(c, x + 6, y + 4, 3, 6, 1, color);
+    }
+
+    public static void drawPauseIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y, 3, 14, 1, color);
+        rounded(c, x + 8, y, 3, 14, 1, color);
+    }
+
+    public static void drawSkipIcon(DrawContext c, int x, int y, boolean next, int color) {
+        if (!next) {
+            rounded(c, x + 9, y, 2, 14, 1, color);
+            rounded(c, x + 1, y + 1, 3, 12, 1, color);
+            rounded(c, x + 4, y + 3, 3, 8, 1, color);
+            rounded(c, x + 7, y + 5, 2, 4, 1, color);
+        } else {
+            rounded(c, x + 1, y, 2, 14, 1, color);
+            rounded(c, x + 8, y + 1, 3, 12, 1, color);
+            rounded(c, x + 5, y + 3, 3, 8, 1, color);
+            rounded(c, x + 3, y + 5, 2, 4, 1, color);
+        }
+    }
+
+    public static void drawVolumeIcon(DrawContext c, int x, int y, int color) {
+        rounded(c, x, y + 4, 3, 6, 1, color);
+        rounded(c, x + 3, y + 2, 3, 10, 1, color);
+        rounded(c, x + 6, y, 2, 2, 1, color);
+        rounded(c, x + 6, y + 12, 2, 2, 1, color);
+    }
+
 }
