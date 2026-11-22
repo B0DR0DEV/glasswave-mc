@@ -195,9 +195,9 @@ public final class GlasswaveScreen extends Screen {
                     fade(0x293E50, alpha));
         }
 
-        GlasswaveWidget.rounded(context, contentX + 13, rowY + 7, 27, 27, 9,
-                fade("deezer".equals(track.source) ? 0x655D86 : 0x3B6875, alpha));
-        drawText(context, "♫", contentX + 21, rowY + 14, fade(0xC6EBE8, alpha), true);
+        CoverArtManager.draw(context, track, contentX + 13, rowY + 7, 27);
+        GlasswaveWidget.rounded(context, contentX + 12, rowY + 6, 29, 29, 10, fade(0x42FFFFFF, alpha));
+        GlasswaveWidget.rounded(context, contentX + 14, rowY + 8, 25, 1, 1, fade(0x48FFFFFF, alpha));
 
         int textX = contentX + 50;
         int textWidth = Math.max(55, contentW - 126);
@@ -208,7 +208,13 @@ public final class GlasswaveScreen extends Screen {
         String heart = isFavorite(track) ? "♥" : "♡";
         drawText(context, heart, contentX + contentW - 36, rowY + 13,
                 fade(isFavorite(track) ? 0xE9A6C0 : 0x8298AA, alpha), true);
-        drawText(context, "···", contentX + contentW - 70, rowY + 13, fade(0x71899C, alpha), false);
+        Track active = MusicLibrary.currentTrack();
+        boolean thisTrackPlaying = AudioEngine.isPlaying() && active != null && active.id.equals(track.id);
+        if (thisTrackPlaying) {
+            CoverArtManager.drawEqualizer(context, contentX + contentW - 76, rowY + 20, 4, 13, true, fade(0x9BE1D9, alpha));
+        } else {
+            drawText(context, "···", contentX + contentW - 70, rowY + 13, fade(0x71899C, alpha), false);
+        }
     }
 
     private void drawPlayerBar(DrawContext context, int y, int mouseX, int mouseY, int alpha) {
@@ -219,14 +225,17 @@ public final class GlasswaveScreen extends Screen {
         GlasswaveWidget.rounded(context, barX + 1, barY + 1, barW - 2, 1, 1, fade(0x4EFFFFFF, alpha));
 
         Track current = MusicLibrary.currentTrack();
-        GlasswaveWidget.rounded(context, barX + 10, barY + 9, 32, 32, 11, fade(0x477C85, alpha));
-        drawText(context, "♫", barX + 19, barY + 18, fade(0xD8F2F0, alpha), true);
+        CoverArtManager.draw(context, current, barX + 10, barY + 9, 32);
+        GlasswaveWidget.rounded(context, barX + 9, barY + 8, 34, 34, 12, fade(0x42FFFFFF, alpha));
+        GlasswaveWidget.rounded(context, barX + 11, barY + 10, 30, 1, 1, fade(0x4BFFFFFF, alpha));
         String currentTitle = current == null ? "Ничего не играет" : current.title;
         String currentArtist = current == null ? "Выбери трек в медиатеке" : current.artist;
         drawText(context, trim(currentTitle, Math.max(70, barW / 3 - 20)), barX + 51, barY + 12,
                 fade(0xF0F5F9, alpha), true);
         drawText(context, trim(currentArtist, Math.max(70, barW / 3 - 20)), barX + 51, barY + 28,
                 fade(0x91A6B8, alpha), false);
+        CoverArtManager.drawEqualizer(context, barX + 51, barY + 43, 6, 8,
+                AudioEngine.isPlaying(), fade(0x8BCFCB, alpha));
 
         int controlsCenter = panelX + panelW / 2 + 10;
         drawControl(context, "‹", controlsCenter - 48, barY + 13, 26, mouseX, mouseY, alpha);
@@ -234,13 +243,15 @@ public final class GlasswaveScreen extends Screen {
                 32, mouseX, mouseY, alpha);
         drawControl(context, "›", controlsCenter + 28, barY + 13, 26, mouseX, mouseY, alpha);
 
-        int sliderX = panelX + panelW - 145;
-        int sliderY = barY + 24;
-        drawText(context, "VOL", sliderX - 29, barY + 20, fade(0x718A9E, alpha), true);
-        GlasswaveWidget.rounded(context, sliderX, sliderY, 84, 4, 2, fade(0x607589, alpha));
-        int fill = (int) (84 * AudioEngine.getVolume());
-        GlasswaveWidget.rounded(context, sliderX, sliderY, Math.max(3, fill), 4, 2, fade(0x9BD9D5, alpha));
-        GlasswaveWidget.rounded(context, sliderX + fill - 4, sliderY - 3, 10, 10, 5, fade(0xE9F6F4, alpha));
+        if (panelW >= 540) {
+            int sliderX = panelX + panelW - 145;
+            int sliderY = barY + 24;
+            drawText(context, "VOL", sliderX - 29, barY + 20, fade(0x718A9E, alpha), true);
+            GlasswaveWidget.rounded(context, sliderX, sliderY, 84, 4, 2, fade(0x607589, alpha));
+            int fill = (int) (84 * AudioEngine.getVolume());
+            GlasswaveWidget.rounded(context, sliderX, sliderY, Math.max(3, fill), 4, 2, fade(0x9BD9D5, alpha));
+            GlasswaveWidget.rounded(context, sliderX + fill - 4, sliderY - 3, 10, 10, 5, fade(0xE9F6F4, alpha));
+        }
     }
 
     private void drawControl(DrawContext context, String label, int x, int y, int size,
@@ -356,11 +367,13 @@ public final class GlasswaveScreen extends Screen {
             MusicLibrary.next();
             return true;
         }
-        int sliderX = panelX + panelW - 145;
-        if (isInside(mouseX, mouseY, sliderX - 3, barY + 13, 92, 24)) {
-            updateVolume(mouseX, sliderX);
-            draggingVolume = true;
-            return true;
+        if (panelW >= 540) {
+            int sliderX = panelX + panelW - 145;
+            if (isInside(mouseX, mouseY, sliderX - 3, barY + 13, 92, 24)) {
+                updateVolume(mouseX, sliderX);
+                draggingVolume = true;
+                return true;
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
