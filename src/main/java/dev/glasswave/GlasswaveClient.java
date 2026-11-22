@@ -3,6 +3,7 @@ package dev.glasswave;
 import dev.glasswave.library.MusicLibrary;
 import dev.glasswave.ui.GlasswaveScreen;
 import dev.glasswave.ui.GlasswaveWidget;
+import dev.glasswave.ui.HudPosition;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -19,6 +20,7 @@ public final class GlasswaveClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        HudPosition.initialize();
         MusicLibrary.initialize();
 
         openKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
