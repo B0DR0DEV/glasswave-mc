@@ -3,7 +3,7 @@
   "id": "glasswave",
   "version": "${version}",
   "name": "Glasswave",
-  "description": "A floating glass music player with album art and animated controls.",
+  "description": "A floating glass music player with privacy-limited Deezer previews.",
   "authors": ["B0DR0DEV"],
   "license": "MIT",
   "environment": "client",
