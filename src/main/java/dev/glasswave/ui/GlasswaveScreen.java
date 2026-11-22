@@ -393,8 +393,8 @@ public final class GlasswaveScreen extends Screen {
 
         int navY = sideY + 28;
         if (isInside(mouseX, mouseY, sideX + 7, navY, sideW - 10, 36)) { tab = TAB_LIBRARY; scroll = 0; searchFocused = false; return true; }
-        if (isInside(mouseX, mouseY, sideX + 7, navY + 40, sideW - 10, 36)) { tab = TAB_FAVORITES; scroll = 0; searchFocused = false; return true; }
-        if (isInside(mouseX, mouseY, sideX + 7, navY + 80, sideW - 10, 36)) { tab = TAB_DISCOVER; scroll = 0; searchFocused = false; return true; }
+        if (isInside(mouseX, mouseY, sideX + 7, navY + 42, sideW - 10, 36)) { tab = TAB_FAVORITES; scroll = 0; searchFocused = false; return true; }
+        if (isInside(mouseX, mouseY, sideX + 7, navY + 84, sideW - 10, 36)) { tab = TAB_DISCOVER; scroll = 0; searchFocused = false; return true; }
 
         int addY = playerY - 62;
         if (isInside(mouseX, mouseY, sideX + 8, addY, sideW - 16, 34)) {
@@ -404,11 +404,11 @@ public final class GlasswaveScreen extends Screen {
         }
 
         int searchY = contentY + 51;
-        if (tab == TAB_DISCOVER && isInside(mouseX, mouseY, contentX + contentW - 72, searchY, 72, 31)) {
+        if (tab == TAB_DISCOVER && isInside(mouseX, mouseY, contentX + contentW - 76, searchY, 76, 33)) {
             MusicLibrary.searchOnline(searchInput, client);
             return true;
         }
-        if (isInside(mouseX, mouseY, contentX, searchY, contentW - (tab == TAB_DISCOVER ? 82 : 0), 31)) {
+        if (isInside(mouseX, mouseY, contentX, searchY, contentW - (tab == TAB_DISCOVER ? 86 : 0), 33)) {
             searchFocused = true;
             return true;
         }
