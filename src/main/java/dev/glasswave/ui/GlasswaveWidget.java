@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 public final class GlasswaveWidget {
     public static final int WIDTH = 236;
     public static final int HEIGHT = 52;
-    private static final int MARGIN = 12;
 
     private GlasswaveWidget() {
     }
@@ -21,47 +20,58 @@ public final class GlasswaveWidget {
         if (client.player == null || client.world == null || client.options.hudHidden
                 || client.currentScreen != null) return;
 
-        int x = client.getWindow().getScaledWidth() - WIDTH - MARGIN;
-        int y = client.getWindow().getScaledHeight() - HEIGHT - 76;
+        int screenWidth = client.getWindow().getScaledWidth();
+        int screenHeight = client.getWindow().getScaledHeight();
+        int x = HudPosition.getX(screenWidth);
+        int y = HudPosition.getY(screenHeight);
         long time = System.currentTimeMillis();
-        int glow = 0x1827C6C9 + ((int) ((Math.sin(time / 750.0) + 1) * 7) << 24);
+        int auraAlpha = 18 + (int) ((Math.sin(time / 720.0) + 1.0) * 7.0);
+        int aura = (auraAlpha << 24) | 0x002BC8C7;
 
-        rounded(context, x - 3, y - 3, WIDTH + 6, HEIGHT + 6, 18, glow);
-        rounded(context, x, y + 2, WIDTH, HEIGHT, 17, 0xD90A111D);
-        rounded(context, x + 1, y, WIDTH - 2, HEIGHT - 3, 16, 0xC8192535);
-        rounded(context, x + 1, y, WIDTH - 2, 1, 16, 0x35FFFFFF);
-        rounded(context, x + 13, y + 10, 32, 32, 11, 0xD8325267);
-        rounded(context, x + 17, y + 14, 24, 24, 8, 0xFF86BFC6);
-        rounded(context, x + 23, y + 22, 2, 8, 1, 0xFF17303A);
-        rounded(context, x + 27, y + 18, 2, 16, 1, 0xFF17303A);
-        rounded(context, x + 31, y + 20, 2, 12, 1, 0xFF17303A);
-        rounded(context, x + 35, y + 24, 2, 5, 1, 0xFF17303A);
+        // Layered glass: soft ambient glow, smoked body, inner reflection and fine edge.
+        rounded(context, x - 4, y - 4, WIDTH + 8, HEIGHT + 8, 21, aura);
+        rounded(context, x - 1, y + 2, WIDTH + 2, HEIGHT + 2, 19, 0xC807101A);
+        rounded(context, x, y, WIDTH, HEIGHT, 18, 0xDB101C2B);
+        rounded(context, x + 1, y + 1, WIDTH - 2, HEIGHT - 3, 17, 0xC51C2D40);
+        rounded(context, x + 3, y + 2, WIDTH - 6, 1, 1, 0x32FFFFFF);
+        rounded(context, x + 9, y + 3, 66, 1, 1, 0x16A9ECE6);
+        rounded(context, x + WIDTH - 52, y + 2, 35, 1, 1, 0x22FFFFFF);
 
-        String title = trim(client, track == null ? "Glasswave" : track.title, 116);
-        String artist = trim(client, track == null ? "Нажми, чтобы открыть медиатеку" : track.artist, 116);
-        context.drawTextWithShadow(client.textRenderer, Text.literal(title), x + 54, y + 13, 0xFFF1F5FA);
-        context.drawText(client.textRenderer, Text.literal(artist), x + 54, y + 29, 0xFF9DAFC0, false);
+        CoverArtManager.draw(context, track, x + 11, y + 9, 34);
+        rounded(context, x + 10, y + 8, 36, 36, 12, 0x40FFFFFF);
+        rounded(context, x + 11, y + 9, 34, 1, 1, 0x58FFFFFF);
 
-        int buttonX = x + WIDTH - 39;
-        rounded(context, buttonX, y + 10, 28, 28, 14, 0x4BFFFFFF);
+        String title = trim(client, track == null ? "Glasswave" : track.title, 112);
+        String artist = trim(client, track == null ? "Нажми, чтобы открыть медиатеку" : track.artist, 112);
+        context.drawTextWithShadow(client.textRenderer, Text.literal(title), x + 54, y + 12, 0xFFF1F5FA);
+        context.drawText(client.textRenderer, Text.literal(artist), x + 54, y + 28, 0xFFA5B6C5, false);
+
+        CoverArtManager.drawEqualizer(context, x + 174, y + 26, 4, 15,
+                AudioEngine.isPlaying(), 0xFF8DDED6);
+
+        int buttonX = x + WIDTH - 37;
+        rounded(context, buttonX - 1, y + 8, 30, 32, 16, 0x20FFFFFF);
+        rounded(context, buttonX, y + 9, 28, 30, 15, 0x5AFFFFFF);
         context.drawTextWithShadow(client.textRenderer,
-                Text.literal(AudioEngine.isPlaying() ? "Ⅱ" : "▶"), buttonX + 9, y + 17, 0xFFF4F8FC);
-        rounded(context, x + 14, y + HEIGHT - 4, WIDTH - 28, 1, 1, 0x30FFFFFF);
+                Text.literal(AudioEngine.isPlaying() ? "Ⅱ" : "▶"), buttonX + 9, y + 18, 0xFFF4F8FC);
+
+        rounded(context, x + 13, y + HEIGHT - 4, WIDTH - 26, 1, 1, 0x35FFFFFF);
         if (AudioEngine.getDurationSeconds() > 0) {
             float progress = (float) Math.min(1.0, AudioEngine.getElapsedSeconds() / AudioEngine.getDurationSeconds());
-            rounded(context, x + 14, y + HEIGHT - 4, Math.max(2, (int) ((WIDTH - 28) * progress)), 1, 1, 0xFF8BD7D2);
+            rounded(context, x + 13, y + HEIGHT - 4,
+                    Math.max(2, (int) ((WIDTH - 26) * progress)), 1, 1, 0xFF91E0D8);
         }
     }
 
     public static boolean contains(int mouseX, int mouseY, int screenWidth, int screenHeight) {
-        int x = screenWidth - WIDTH - MARGIN;
-        int y = screenHeight - HEIGHT - 76;
+        int x = HudPosition.getX(screenWidth);
+        int y = HudPosition.getY(screenHeight);
         return mouseX >= x && mouseX <= x + WIDTH && mouseY >= y && mouseY <= y + HEIGHT;
     }
 
     public static void onClick(int mouseX, int mouseY, MinecraftClient client) {
-        int x = client.getWindow().getScaledWidth() - WIDTH - MARGIN;
-        int y = client.getWindow().getScaledHeight() - HEIGHT - 76;
+        int x = HudPosition.getX(client.getWindow().getScaledWidth());
+        int y = HudPosition.getY(client.getWindow().getScaledHeight());
         if (mouseX >= x + WIDTH - 47 && mouseY >= y + 6 && mouseY <= y + HEIGHT - 5) {
             MusicLibrary.togglePlayback();
         } else {
