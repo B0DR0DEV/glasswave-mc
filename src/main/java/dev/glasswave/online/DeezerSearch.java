@@ -31,7 +31,7 @@ public final class DeezerSearch {
         URI uri = URI.create("https://api.deezer.com/search?q=" + encoded + "&limit=25");
         HttpRequest request = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(15))
-                .header("User-Agent", "Glasswave-Minecraft/0.1.0")
+                .header("User-Agent", "Glasswave-Minecraft/0.2.0")
                 .header("Accept", "application/json")
                 .GET()
                 .build();
@@ -63,12 +63,18 @@ public final class DeezerSearch {
                     ? item.getAsJsonObject("artist") : new JsonObject();
             JsonObject album = item.has("album") && item.get("album").isJsonObject()
                     ? item.getAsJsonObject("album") : new JsonObject();
+
+            String cover = string(album, "cover_big");
+            if (cover.isBlank()) cover = string(album, "cover_medium");
+            if (cover.isBlank()) cover = string(album, "cover");
+
             tracks.add(Track.online(
                     id,
                     string(item, "title"),
                     string(artist, "name"),
                     string(album, "title"),
-                    preview
+                    preview,
+                    cover
             ));
         }
         return tracks;
