@@ -11,8 +11,10 @@ import javax.sound.sampled.SourceDataLine;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URLConnection;
+import java.io.FilterInputStream;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -116,11 +118,60 @@ public final class AudioEngine {
         if ("local".equals(track.source)) {
             return new FileInputStream(Path.of(track.location).toFile());
         }
-        URLConnection connection = new URL(track.previewUrl).openConnection();
-        connection.setConnectTimeout(8_000);
-        connection.setReadTimeout(15_000);
-        connection.setRequestProperty("User-Agent", "Glasswave-Minecraft/0.1.0");
-        return connection.getInputStream();
+        return openDeezerPreview(track.previewUrl);
+    }
+
+    /** Only HTTPS streams hosted by Deezer's dzcdn.net media domain are accepted. */
+    private static InputStream openDeezerPreview(String rawUrl) throws Exception {
+        URI current = URI.create(rawUrl);
+        for (int redirect = 0; redirect <= 4; redirect++) {
+            validateDeezerMediaUri(current);
+            URLConnection rawConnection = current.toURL().openConnection();
+            rawConnection.setConnectTimeout(8_000);
+            rawConnection.setReadTimeout(15_000);
+            rawConnection.setRequestProperty("User-Agent", "Glasswave-Minecraft/0.2.0");
+
+            if (!(rawConnection instanceof HttpURLConnection connection)) {
+                throw new IllegalStateException("Unsupported preview connection");
+            }
+            connection.setInstanceFollowRedirects(false);
+            int response = connection.getResponseCode();
+            if (response >= 300 && response < 400) {
+                String location = connection.getHeaderField("Location");
+                connection.disconnect();
+                if (location == null || location.isBlank()) {
+                    throw new IllegalStateException("Preview redirect did not include a destination");
+                }
+                current = current.resolve(location);
+                continue;
+            }
+            if (response < 200 || response >= 300) {
+                connection.disconnect();
+                throw new IllegalStateException("Preview server returned HTTP " + response);
+            }
+
+            InputStream stream = connection.getInputStream();
+            return new FilterInputStream(stream) {
+                @Override
+                public void close() throws java.io.IOException {
+                    try {
+                        super.close();
+                    } finally {
+                        connection.disconnect();
+                    }
+                }
+            };
+        }
+        throw new IllegalStateException("Too many preview redirects");
+    }
+
+    private static void validateDeezerMediaUri(URI uri) {
+        String host = uri.getHost();
+        boolean allowedHost = host != null
+                && (host.equalsIgnoreCase("dzcdn.net") || host.toLowerCase(java.util.Locale.ROOT).endsWith(".dzcdn.net"));
+        if (!"https".equalsIgnoreCase(uri.getScheme()) || !allowedHost || uri.getUserInfo() != null) {
+            throw new SecurityException("Only HTTPS previews from Deezer's dzcdn.net domain are allowed");
+        }
     }
 
     public static synchronized void togglePause() {
